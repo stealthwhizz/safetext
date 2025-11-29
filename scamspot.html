@@ -1,0 +1,1034 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ScamSpot - SMS Scam Detector</title>
+    <style>
+        /* Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            font-size: 16px;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Container */
+        .container {
+            max-width: 800px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            padding: 30px 20px;
+            color: white;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        header p {
+            font-size: 1.1rem;
+            opacity: 0.95;
+        }
+
+        /* Main Content */
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Card Styles */
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        /* Input Section */
+        .input-section {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #333;
+            font-size: 1.1rem;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 150px;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            font-family: inherit;
+            resize: vertical;
+            transition: border-color 0.3s ease;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        /* Buttons */
+        button {
+            min-width: 44px;
+            min-height: 44px;
+            padding: 15px 30px;
+            font-size: 1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+            width: 100%;
+            margin-bottom: 15px;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: #f5f5f5;
+            color: #333;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .btn-share {
+            background: #10b981;
+            color: white;
+            width: 100%;
+        }
+
+        .btn-share:hover {
+            background: #059669;
+        }
+
+        /* Results Section */
+        .results-section {
+            display: none;
+        }
+
+        .results-section.visible {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Risk Badge */
+        .risk-badge {
+            text-align: center;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+        }
+
+        .risk-badge.low {
+            background: #d1fae5;
+            border: 3px solid #10b981;
+        }
+
+        .risk-badge.medium {
+            background: #fef3c7;
+            border: 3px solid #f59e0b;
+        }
+
+        .risk-badge.high {
+            background: #fee2e2;
+            border: 3px solid #ef4444;
+        }
+
+        .risk-level {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .risk-badge.low .risk-level {
+            color: #10b981;
+        }
+
+        .risk-badge.medium .risk-level {
+            color: #f59e0b;
+        }
+
+        .risk-badge.high .risk-level {
+            color: #ef4444;
+        }
+
+        .risk-score {
+            font-size: 3rem;
+            font-weight: 700;
+            margin: 15px 0;
+        }
+
+        .risk-message {
+            font-size: 1.1rem;
+            color: #666;
+        }
+
+        /* Red Flags Section */
+        .red-flags {
+            margin-bottom: 25px;
+        }
+
+        .red-flags h2 {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .flag-list {
+            list-style: none;
+        }
+
+        .flag-item {
+            padding: 15px;
+            background: #f9fafb;
+            border-left: 4px solid #ef4444;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+
+        .flag-name {
+            font-weight: 600;
+            color: #ef4444;
+            margin-bottom: 5px;
+        }
+
+        .flag-explanation {
+            color: #666;
+            font-size: 0.95rem;
+        }
+
+        /* Recommendations Section */
+        .recommendations {
+            margin-bottom: 25px;
+        }
+
+        .recommendations h2 {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .recommendation-list {
+            list-style: none;
+        }
+
+        .recommendation-item {
+            padding: 12px 15px;
+            background: #eff6ff;
+            border-left: 4px solid #3b82f6;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            color: #1e40af;
+        }
+
+        /* Scammer Goals Section */
+        .scammer-goals {
+            margin-bottom: 25px;
+        }
+
+        .scammer-goals h2 {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .goals-list {
+            list-style: none;
+        }
+
+        .goal-item {
+            padding: 12px 15px;
+            background: #fef2f2;
+            border-left: 4px solid #dc2626;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            color: #991b1b;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: white;
+            opacity: 0.9;
+        }
+
+        footer p {
+            font-size: 0.9rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2rem;
+            }
+
+            header p {
+                font-size: 1rem;
+            }
+
+            .card {
+                padding: 20px;
+            }
+
+            .risk-score {
+                font-size: 2.5rem;
+            }
+        }
+
+        /* Accessibility - Reduced Motion */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* Hidden utility class */
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>🛡️ ScamSpot</h1>
+            <p>Protect yourself from SMS scams with instant message analysis</p>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <div class="card">
+                <div class="input-section">
+                    <label for="message-input">
+                        Paste your suspicious SMS message below:
+                    </label>
+                    <textarea 
+                        id="message-input" 
+                        aria-label="Enter SMS message to analyze for scam indicators"
+                        placeholder="Example: Dear customer, your account will be blocked in 24 hours. Click here to verify..."
+                    ></textarea>
+                </div>
+
+                <button 
+                    id="check-button" 
+                    class="btn-primary"
+                    aria-label="Check message for scam indicators"
+                >
+                    🔍 Check for Scam
+                </button>
+            </div>
+
+            <div id="results-container" class="card results-section" role="region" aria-live="polite">
+                <!-- Risk Badge -->
+                <div id="risk-badge" class="risk-badge" role="status">
+                    <div class="risk-level" id="risk-level">RISK LEVEL</div>
+                    <div class="risk-score" id="risk-score">0%</div>
+                    <div class="risk-message" id="risk-message">Analysis result will appear here</div>
+                </div>
+
+                <!-- Red Flags -->
+                <div id="red-flags-section" class="red-flags">
+                    <h2>🚩 Detected Red Flags</h2>
+                    <ul id="flag-list" class="flag-list" role="list">
+                        <!-- Red flags will be inserted here -->
+                    </ul>
+                </div>
+
+                <!-- Recommendations -->
+                <div id="recommendations-section" class="recommendations">
+                    <h2>💡 What You Should Do</h2>
+                    <ul id="recommendation-list" class="recommendation-list" role="list">
+                        <!-- Recommendations will be inserted here -->
+                    </ul>
+                </div>
+
+                <!-- Scammer Goals -->
+                <div id="scammer-goals-section" class="scammer-goals hidden">
+                    <h2>⚠️ What Scammers Want</h2>
+                    <ul id="goals-list" class="goals-list" role="list">
+                        <!-- Scammer goals will be inserted here -->
+                    </ul>
+                </div>
+
+                <!-- Action Buttons -->
+                <button 
+                    id="check-another-button" 
+                    class="btn-secondary"
+                    aria-label="Clear results and check another message"
+                >
+                    ↻ Check Another Message
+                </button>
+
+                <button 
+                    id="share-button" 
+                    class="btn-share"
+                    aria-label="Share ScamSpot with others"
+                >
+                    📤 Share ScamSpot
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>ScamSpot - Free SMS Scam Detection Tool | Works Offline | No Data Collection</p>
+        </div>
+    </footer>
+
+    <script>
+        // ============================================
+        // CONFIGURATION: Pattern Definitions
+        // ============================================
+        
+        const PATTERNS = {
+            highRisk: [
+                {
+                    name: "Sensitive Information Request",
+                    regex: /\b(otp|pin|password|cvv|card number|account number)\b/gi,
+                    points: 25,
+                    category: "high",
+                    explanation: "Requests for OTP, PIN, password, or CVV"
+                },
+                {
+                    name: "Urgency Language",
+                    regex: /\b(immediately|urgent|within \d+ hours?|account blocked|will expire|expires soon|act now)\b/gi,
+                    points: 25,
+                    category: "high",
+                    explanation: "Creates false sense of urgency"
+                },
+                {
+                    name: "Threats",
+                    regex: /\b(legal action|warrant|police|court case|arrest|suspended|terminated)\b/gi,
+                    points: 25,
+                    category: "high",
+                    explanation: "Uses threats or intimidation"
+                },
+                {
+                    name: "Prize Claims",
+                    regex: /\b(you won|lottery|winner|claim prize|congratulations|selected|reward)\b/gi,
+                    points: 25,
+                    category: "high",
+                    explanation: "Claims you won something you didn't enter"
+                },
+                {
+                    name: "Financial Requests",
+                    regex: /\b(send money|pay now|transfer funds|payment required|make payment)\b/gi,
+                    points: 25,
+                    category: "high",
+                    explanation: "Requests immediate payment or money transfer"
+                }
+            ],
+            mediumRisk: [
+                {
+                    name: "Bank Impersonation",
+                    regex: /\b(bank|banking|account|debit card|credit card)\b/gi,
+                    points: 15,
+                    category: "medium",
+                    explanation: "Claims to be from a bank without official sender ID"
+                },
+                {
+                    name: "Government Impersonation",
+                    regex: /\b(income tax|aadhaar|pan card|government|tax department|irs)\b/gi,
+                    points: 15,
+                    category: "medium",
+                    explanation: "Impersonates government agencies"
+                },
+                {
+                    name: "Suspicious Links",
+                    regex: /\b(bit\.ly|tinyurl|goo\.gl|t\.co|ow\.ly|is\.gd)\b/gi,
+                    points: 15,
+                    category: "medium",
+                    explanation: "Contains shortened or suspicious URLs"
+                },
+                {
+                    name: "Generic Greetings",
+                    regex: /\b(dear customer|dear user|dear member|valued customer)\b/gi,
+                    points: 15,
+                    category: "medium",
+                    explanation: "Uses generic greetings instead of your name"
+                }
+            ],
+            lowRisk: [
+                {
+                    name: "Official Sender Code",
+                    regex: /\b(BK-|VM-|AMAZON|GOOGLE|PAYPAL|NETFLIX)\b/g,
+                    points: -10,
+                    category: "low",
+                    explanation: "Contains known official sender code"
+                },
+                {
+                    name: "Security Warning",
+                    regex: /\b(do not share|never share|keep confidential|for security)\b/gi,
+                    points: -10,
+                    category: "low",
+                    explanation: "Includes legitimate security warnings"
+                }
+            ]
+        };
+
+        // ============================================
+        // CONFIGURATION: Risk Thresholds
+        // ============================================
+        
+        const RISK_THRESHOLDS = {
+            LOW: { max: 30, color: "green", message: "Likely legitimate" },
+            MEDIUM: { min: 31, max: 60, color: "yellow", message: "Proceed with caution" },
+            HIGH: { min: 61, color: "red", message: "Likely scam - do not respond" }
+        };
+
+        // ============================================
+        // CONFIGURATION: Recommendations
+        // ============================================
+        
+        const RECOMMENDATIONS = {
+            LOW: [
+                "This message appears legitimate",
+                "Still verify sender if requesting sensitive actions",
+                "When in doubt, contact the organization directly"
+            ],
+            MEDIUM: [
+                "Verify the sender through official channels",
+                "Do not click any links",
+                "Contact the organization using known contact information",
+                "Be cautious about sharing any information"
+            ],
+            HIGH: [
+                "Do NOT respond to this message",
+                "Do NOT click any links",
+                "Do NOT share any personal information",
+                "Block the sender",
+                "Report as spam to your carrier",
+                "Delete the message"
+            ]
+        };
+
+        // ============================================
+        // CORE LOGIC: Pattern Detection
+        // ============================================
+
+        /**
+         * Detects scam patterns in the provided message text
+         * @param {string} messageText - The SMS message to analyze
+         * @returns {Array} Array of DetectedPattern objects
+         */
+        function detectPatterns(messageText) {
+            const detectedPatterns = [];
+            
+            if (!messageText || typeof messageText !== 'string') {
+                return detectedPatterns;
+            }
+
+            // Iterate through all pattern categories
+            const allCategories = [
+                ...PATTERNS.highRisk,
+                ...PATTERNS.mediumRisk,
+                ...PATTERNS.lowRisk
+            ];
+
+            for (const pattern of allCategories) {
+                try {
+                    // Apply regex pattern to message text
+                    const matches = messageText.match(pattern.regex);
+                    const matchCount = matches ? matches.length : 0;
+
+                    // If pattern matched, add to detected patterns
+                    if (matchCount > 0) {
+                        detectedPatterns.push({
+                            name: pattern.name,
+                            points: pattern.points,
+                            category: pattern.category,
+                            explanation: pattern.explanation,
+                            matches: matchCount
+                        });
+                    }
+                } catch (error) {
+                    // Handle regex errors gracefully
+                    console.error(`Error processing pattern "${pattern.name}":`, error);
+                    // Skip this pattern and continue with others
+                }
+            }
+
+            return detectedPatterns;
+        }
+
+        // ============================================
+        // CORE LOGIC: Scoring Engine
+        // ============================================
+
+        /**
+         * Calculates risk score based on detected patterns
+         * @param {Array} detectedPatterns - Array of DetectedPattern objects
+         * @returns {Object} ScoreResult object with totalPoints, percentage, riskLevel, riskColor, riskMessage
+         */
+        function calculateScore(detectedPatterns) {
+            // Sum total points from all detected patterns (pattern.points × pattern.matches)
+            let totalPoints = 0;
+            
+            if (Array.isArray(detectedPatterns)) {
+                for (const pattern of detectedPatterns) {
+                    if (pattern && typeof pattern.points === 'number' && typeof pattern.matches === 'number') {
+                        totalPoints += pattern.points * pattern.matches;
+                    }
+                }
+            }
+
+            // Convert total points to percentage (normalize to 0-100 range)
+            // Using a simple normalization: assume 100 points = 100%
+            let percentage = totalPoints;
+
+            // Handle negative scores by setting percentage to 0
+            if (percentage < 0) {
+                percentage = 0;
+            }
+
+            // Handle excessive scores by capping percentage at 100
+            if (percentage > 100) {
+                percentage = 100;
+            }
+
+            // Determine risk level based on thresholds
+            let riskLevel, riskColor, riskMessage;
+
+            if (percentage <= RISK_THRESHOLDS.LOW.max) {
+                // 0-30: LOW RISK
+                riskLevel = "LOW RISK";
+                riskColor = RISK_THRESHOLDS.LOW.color;
+                riskMessage = RISK_THRESHOLDS.LOW.message;
+            } else if (percentage >= RISK_THRESHOLDS.MEDIUM.min && percentage <= RISK_THRESHOLDS.MEDIUM.max) {
+                // 31-60: MEDIUM RISK
+                riskLevel = "MEDIUM RISK";
+                riskColor = RISK_THRESHOLDS.MEDIUM.color;
+                riskMessage = RISK_THRESHOLDS.MEDIUM.message;
+            } else {
+                // 61+: HIGH RISK
+                riskLevel = "HIGH RISK";
+                riskColor = RISK_THRESHOLDS.HIGH.color;
+                riskMessage = RISK_THRESHOLDS.HIGH.message;
+            }
+
+            // Return ScoreResult object
+            return {
+                totalPoints: totalPoints,
+                percentage: percentage,
+                riskLevel: riskLevel,
+                riskColor: riskColor,
+                riskMessage: riskMessage
+            };
+        }
+
+        // ============================================
+        // CORE LOGIC: Recommendations
+        // ============================================
+
+        /**
+         * Returns appropriate recommendations based on risk level
+         * @param {string} riskLevel - The risk level ("LOW RISK", "MEDIUM RISK", or "HIGH RISK")
+         * @returns {Array} Array of recommendation strings
+         */
+        function getRecommendations(riskLevel) {
+            // Normalize risk level to match RECOMMENDATIONS keys
+            const normalizedLevel = riskLevel.replace(' RISK', '');
+            
+            // Return appropriate recommendations array based on risk level
+            if (normalizedLevel === 'LOW') {
+                return RECOMMENDATIONS.LOW;
+            } else if (normalizedLevel === 'MEDIUM') {
+                return RECOMMENDATIONS.MEDIUM;
+            } else if (normalizedLevel === 'HIGH') {
+                return RECOMMENDATIONS.HIGH;
+            }
+            
+            // Default to medium risk recommendations if level is unrecognized
+            return RECOMMENDATIONS.MEDIUM;
+        }
+
+        /**
+         * Analyzes detected patterns to determine what scammers might want
+         * @param {Array} detectedPatterns - Array of DetectedPattern objects
+         * @returns {Array} Array of scammer goal descriptions
+         */
+        function getScammerGoals(detectedPatterns) {
+            const goals = [];
+            const goalSet = new Set(); // Use Set to avoid duplicates
+            
+            if (!Array.isArray(detectedPatterns)) {
+                return goals;
+            }
+
+            // Analyze pattern types to determine scammer goals
+            for (const pattern of detectedPatterns) {
+                if (!pattern || !pattern.name) continue;
+
+                const patternName = pattern.name.toLowerCase();
+
+                // Check for sensitive information requests
+                if (patternName.includes('sensitive information') || 
+                    patternName.includes('password') || 
+                    patternName.includes('otp') || 
+                    patternName.includes('pin') || 
+                    patternName.includes('cvv')) {
+                    goalSet.add("Steal your OTP or password");
+                }
+
+                // Check for financial requests
+                if (patternName.includes('financial') || 
+                    patternName.includes('money') || 
+                    patternName.includes('payment') || 
+                    patternName.includes('prize')) {
+                    goalSet.add("Trick you into sending money");
+                }
+
+                // Check for personal information gathering
+                if (patternName.includes('bank') || 
+                    patternName.includes('government') || 
+                    patternName.includes('account')) {
+                    goalSet.add("Obtain your personal information");
+                }
+
+                // Check for link-based attacks
+                if (patternName.includes('link') || 
+                    patternName.includes('suspicious')) {
+                    goalSet.add("Get you to click malicious links");
+                }
+
+                // Check for urgency/threat tactics
+                if (patternName.includes('urgency') || 
+                    patternName.includes('threat')) {
+                    goalSet.add("Pressure you into acting without thinking");
+                }
+            }
+
+            // Convert Set to Array
+            return Array.from(goalSet);
+        }
+
+        // ============================================
+        // CORE LOGIC: Analysis Controller
+        // ============================================
+
+        /**
+         * Analyzes a message for scam indicators and returns comprehensive results
+         * @param {string} messageText - The SMS message to analyze
+         * @returns {Object} AnalysisResult object containing score, detectedPatterns, recommendations, scammerGoals
+         */
+        function analyzeMessage(messageText) {
+            try {
+                // Validate input (check for empty or whitespace-only messages)
+                if (!messageText || typeof messageText !== 'string') {
+                    return {
+                        error: true,
+                        errorMessage: "Please enter a message to analyze"
+                    };
+                }
+
+                // Check for whitespace-only input
+                const trimmedMessage = messageText.trim();
+                if (trimmedMessage.length === 0) {
+                    return {
+                        error: true,
+                        errorMessage: "Please enter a message to analyze"
+                    };
+                }
+
+                // Call detectPatterns to get detected patterns
+                const detectedPatterns = detectPatterns(messageText);
+
+                // Call calculateScore with detected patterns to get score result
+                const scoreResult = calculateScore(detectedPatterns);
+
+                // Call getRecommendations with risk level to get recommendations
+                const recommendations = getRecommendations(scoreResult.riskLevel);
+
+                // Call getScammerGoals with detected patterns to get scammer goals
+                const scammerGoals = getScammerGoals(detectedPatterns);
+
+                // Return AnalysisResult object containing score, detectedPatterns, recommendations, scammerGoals
+                return {
+                    error: false,
+                    score: scoreResult,
+                    detectedPatterns: detectedPatterns,
+                    recommendations: recommendations,
+                    scammerGoals: scammerGoals
+                };
+
+            } catch (error) {
+                // Handle errors gracefully and return appropriate error messages
+                console.error('Error during message analysis:', error);
+                return {
+                    error: true,
+                    errorMessage: "An error occurred while analyzing the message. Please try again."
+                };
+            }
+        }
+
+        // ============================================
+        // UI CONTROLLER: Event Handlers and Display
+        // ============================================
+
+        /**
+         * Handles the analyze button click event
+         */
+        function handleAnalyzeClick() {
+            try {
+                // Get message text from textarea
+                const messageInput = document.getElementById('message-input');
+                const messageText = messageInput.value;
+
+                // Call analyzeMessage with the text
+                const result = analyzeMessage(messageText);
+
+                // Handle error case
+                if (result.error) {
+                    alert(result.errorMessage);
+                    return;
+                }
+
+                // Call displayResults with the analysis result
+                displayResults(result);
+
+            } catch (error) {
+                console.error('Error in handleAnalyzeClick:', error);
+                alert('An error occurred while analyzing the message. Please try again.');
+            }
+        }
+
+        /**
+         * Displays the analysis results in the UI
+         * @param {Object} result - AnalysisResult object
+         */
+        function displayResults(result) {
+            // Get results container
+            const resultsContainer = document.getElementById('results-container');
+            const riskBadge = document.getElementById('risk-badge');
+            const riskLevel = document.getElementById('risk-level');
+            const riskScore = document.getElementById('risk-score');
+            const riskMessage = document.getElementById('risk-message');
+            const flagList = document.getElementById('flag-list');
+            const recommendationList = document.getElementById('recommendation-list');
+            const goalsList = document.getElementById('goals-list');
+            const scammerGoalsSection = document.getElementById('scammer-goals-section');
+
+            // Update risk badge with color, level, and message
+            riskBadge.className = 'risk-badge ' + result.score.riskColor;
+            riskLevel.textContent = result.score.riskLevel;
+            riskScore.textContent = result.score.percentage + '%';
+            riskMessage.textContent = result.score.riskMessage;
+
+            // Clear previous red flags
+            flagList.innerHTML = '';
+
+            // Render list of detected red flags with explanations
+            if (result.detectedPatterns.length > 0) {
+                result.detectedPatterns.forEach(pattern => {
+                    const li = document.createElement('li');
+                    li.className = 'flag-item';
+                    li.setAttribute('role', 'listitem');
+                    
+                    const flagName = document.createElement('div');
+                    flagName.className = 'flag-name';
+                    flagName.textContent = pattern.name + (pattern.matches > 1 ? ` (${pattern.matches} times)` : '');
+                    
+                    const flagExplanation = document.createElement('div');
+                    flagExplanation.className = 'flag-explanation';
+                    flagExplanation.textContent = pattern.explanation;
+                    
+                    li.appendChild(flagName);
+                    li.appendChild(flagExplanation);
+                    flagList.appendChild(li);
+                });
+            } else {
+                // Handle case where no red flags are detected
+                const li = document.createElement('li');
+                li.className = 'flag-item';
+                li.style.borderLeftColor = '#10b981';
+                li.textContent = 'No suspicious patterns detected in this message.';
+                flagList.appendChild(li);
+            }
+
+            // Clear previous recommendations
+            recommendationList.innerHTML = '';
+
+            // Display recommendations as a list
+            result.recommendations.forEach(recommendation => {
+                const li = document.createElement('li');
+                li.className = 'recommendation-item';
+                li.setAttribute('role', 'listitem');
+                li.textContent = recommendation;
+                recommendationList.appendChild(li);
+            });
+
+            // Clear previous scammer goals
+            goalsList.innerHTML = '';
+
+            // Display scammer goals if applicable
+            if (result.scammerGoals.length > 0) {
+                scammerGoalsSection.classList.remove('hidden');
+                result.scammerGoals.forEach(goal => {
+                    const li = document.createElement('li');
+                    li.className = 'goal-item';
+                    li.setAttribute('role', 'listitem');
+                    li.textContent = goal;
+                    goalsList.appendChild(li);
+                });
+            } else {
+                scammerGoalsSection.classList.add('hidden');
+            }
+
+            // Show results container
+            resultsContainer.classList.add('visible');
+            
+            // Scroll to results
+            resultsContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        /**
+         * Clears results and resets the form
+         */
+        function clearResults() {
+            // Clear textarea value
+            const messageInput = document.getElementById('message-input');
+            messageInput.value = '';
+
+            // Hide results container
+            const resultsContainer = document.getElementById('results-container');
+            resultsContainer.classList.remove('visible');
+
+            // Focus cursor on textarea
+            messageInput.focus();
+        }
+
+        /**
+         * Handles the share button click
+         */
+        function handleShare() {
+            const shareText = 'Check out ScamSpot - a free tool to detect SMS scams and protect yourself from fraud!';
+            const shareUrl = window.location.href;
+
+            // Use Web Share API if available (for mobile)
+            if (navigator.share) {
+                navigator.share({
+                    title: 'ScamSpot - SMS Scam Detector',
+                    text: shareText,
+                    url: shareUrl
+                }).catch(err => {
+                    console.log('Error sharing:', err);
+                });
+            } else {
+                // Fallback to copying link to clipboard
+                navigator.clipboard.writeText(shareUrl).then(() => {
+                    alert('Link copied to clipboard! Share it with friends and family.');
+                }).catch(err => {
+                    console.error('Error copying to clipboard:', err);
+                    alert('Share this link: ' + shareUrl);
+                });
+            }
+        }
+
+        // ============================================
+        // INITIALIZATION
+        // ============================================
+        
+        // Wait for DOM to be ready
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('ScamSpot initialized with', 
+                PATTERNS.highRisk.length + PATTERNS.mediumRisk.length + PATTERNS.lowRisk.length,
+                'detection patterns');
+
+            // Get DOM elements
+            const checkButton = document.getElementById('check-button');
+            const checkAnotherButton = document.getElementById('check-another-button');
+            const shareButton = document.getElementById('share-button');
+            const messageInput = document.getElementById('message-input');
+
+            // Attach event listeners
+            if (checkButton) {
+                checkButton.addEventListener('click', handleAnalyzeClick);
+            }
+
+            if (checkAnotherButton) {
+                checkAnotherButton.addEventListener('click', clearResults);
+            }
+
+            if (shareButton) {
+                shareButton.addEventListener('click', handleShare);
+            }
+
+            // Add keyboard support (Enter key in textarea triggers analysis)
+            if (messageInput) {
+                messageInput.addEventListener('keydown', function(event) {
+                    // Check if Ctrl+Enter or Cmd+Enter is pressed
+                    if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) {
+                        event.preventDefault();
+                        handleAnalyzeClick();
+                    }
+                });
+
+                // Set initial focus
+                messageInput.focus();
+            }
+        });
+    </script>
+</body>
+</html>
